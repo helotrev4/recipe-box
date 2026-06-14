@@ -41,3 +41,11 @@
 ### Cloud
 
 - Microsoft Azure
+
+## Side Notes
+
+pip install fastapi uvicorn
+
+uvicorn main:app --reload
+
+http://127.0.0.1:8000
