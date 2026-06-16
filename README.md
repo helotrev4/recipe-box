@@ -52,5 +52,10 @@ pip install fastapi uvicorn sqlalchemy psycopg2-binary
 uvicorn main:app --reload
 
 http://127.0.0.1:8000
+http://localhost:8000/docs
 
 curl.exe -X GET http://localhost:8000
+curl.exe -X GET http://localhost:8000/recipes/{num}
+
+curl.exe -X POST http://localhost:8000/recipes?name=Spaghetti (old)
+curl.exe -X POST http://localhost:8000/recipes -H "Content-Type: application/json" -d '{\"name\": \"Spaghetti\"}'
