@@ -10,7 +10,7 @@ def root():
 
 class Recipe(BaseModel):
     id: Optional[int] = None
-    name:str 
+    name:str # means that this is a required for creating item
     calories:int = 0
     
 recipes = [
@@ -24,11 +24,11 @@ recipes = [
     # }
 ]
 
-@app.get("/recipes")
+@app.get("/recipes", response_model=list[Recipe])
 def list_recipes(limit: int = 10):
     return recipes[0:limit]
 
-@app.get("/recipes/{recipe_id}")
+@app.get("/recipes/{recipe_id}", response_model=Recipe)
 def get_recipes(recipe_id: int) -> Recipe:
     for recipe in recipes: #iterates through all the recipes
         if recipe["id"] == recipe_id:
