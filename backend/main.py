@@ -9,7 +9,7 @@ def root():
     return {"message": "Recipe Box API"}
 
 class Recipe(BaseModel):
-    id: Optional[int] = None
+    id: int
     name:str # means that this is a required for creating item
     calories:int = 0
     
@@ -37,13 +37,28 @@ def get_recipes(recipe_id: int) -> Recipe:
     # Raise exception only after checking all recipes
     raise HTTPException(status_code=404, detail=f"Recipe not found")
 
+next_id = 1 # Global variable so delete doesn't conflict ID creation in the future
+
 @app.post("/recipes")
 def create_recipe(recipe: Recipe): # Using BaseModel to create 
+    global next_id
     new_recipe = {
-        "id": len(recipes) + 1,
+        "id": next_id,
         "name": recipe.name,
         "calories": recipe.calories
     }
-    
+    next_id += 1
     recipes.append(new_recipe)
     return new_recipe
+
+@app.delete("/recipes/{recipe_id}")
+def delete_recipe(recipe_id: int):
+    for recipe in recipes:
+        if recipe["id"] == recipe_id:
+            recipes.remove(recipe)
+            
+            return {
+                "message": f"Recipe {recipe_id}: {recipe["name"]} deleted successfully"
+            }
+            
+    raise HTTPException(status_code=404, detail=f"Recipe not found")

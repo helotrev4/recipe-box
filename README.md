@@ -42,7 +42,7 @@
 
 - Microsoft Azure
 
-## Side Notes
+## Side Notes and Commands
 
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 venv\Scripts\activate
