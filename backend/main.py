@@ -1,6 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Optional
+from database import engine
+from models import Base
+
+# from typing import Optional
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
@@ -13,16 +17,16 @@ class Recipe(BaseModel):
     name:str # means that this is a required for creating item
     calories:int = 0
     
-recipes = [
-    # {
-    #     "id": 1,
-    #     "name": "Chicken Nuggets"
-    # },
-    # {
-    #     "id": 2,
-    #     "name": "Hamburger"
-    # }
-]
+# recipes = [
+#     # {
+#     #     "id": 1,
+#     #     "name": "Chicken Nuggets"
+#     # },
+#     # {
+#     #     "id": 2,
+#     #     "name": "Hamburger"
+#     # }
+# ]
 
 @app.get("/recipes", response_model=list[Recipe])
 def list_recipes(limit: int = 10):
@@ -37,7 +41,7 @@ def get_recipes(recipe_id: int) -> Recipe:
     # Raise exception only after checking all recipes
     raise HTTPException(status_code=404, detail=f"Recipe not found")
 
-next_id = 1 # Global variable so delete doesn't conflict ID creation in the future
+# next_id = 1 # Global variable so delete doesn't conflict ID creation in the future (placeholder until database implement)
 
 @app.post("/recipes")
 def create_recipe(recipe: Recipe): # Using BaseModel to create 
