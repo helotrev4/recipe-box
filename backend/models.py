@@ -3,8 +3,7 @@ from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
-
-class RecipeDB(Base):
+class Recipe(Base):
     __tablename__ = "recipes"
 
     id = Column(Integer, primary_key=True, index=True)

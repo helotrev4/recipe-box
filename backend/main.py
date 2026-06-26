@@ -1,68 +1,75 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from pydantic import BaseModel
-from database import engine
-from models import Base
-
-# from typing import Optional
-Base.metadata.create_all(bind=engine)
+from database import engine, async_session
+from models import Base, Recipe as RecipeModel
 
 app = FastAPI()
+
+# Initialize the database tables
+
+@app.on_event("startup")
+async def startup_event():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
 
 @app.get("/")
 def root():
     return {"message": "Recipe Box API"}
 
-class Recipe(BaseModel):
+class RecipeBase(BaseModel):
     id: int
     name:str # means that this is a required for creating item
     calories:int = 0
     
-# recipes = [
-#     # {
-#     #     "id": 1,
-#     #     "name": "Chicken Nuggets"
-#     # },
-#     # {
-#     #     "id": 2,
-#     #     "name": "Hamburger"
-#     # }
-# ]
+class Config:
+    orm_mode = True  # Enable ORM mode for SQLAlchemy models
 
-@app.get("/recipes", response_model=list[Recipe])
-def list_recipes(limit: int = 10):
-    return recipes[0:limit]
+class RecipeCreate(RecipeBase):
+    pass  # Used for creating recipes, excludes `id`
+
+class Recipe(RecipeBase):
+    id: int  # Include `id` for responses
+    
+# Dependency to get the database session
+async def get_db():
+    async with async_session() as session:
+        yield session
+
+@app.get("/recipes", response_model=list[Recipe]) #results in a list of objects
+async def list_recipes(db: AsyncSession = Depends(get_db)): # async, Python does other work in the meantime
+    # await -> pause until database responds
+    # SELECT * FROM recipes; run in SQL 
+    result = await db.execute(select(RecipeModel)) #before calling function, run get_db()
+    recipes = result.scalars().all() # extracts model object, puts them in a list
+    return recipes
 
 @app.get("/recipes/{recipe_id}", response_model=Recipe)
-def get_recipes(recipe_id: int) -> Recipe:
-    for recipe in recipes: #iterates through all the recipes
-        if recipe["id"] == recipe_id:
-            return Recipe(**recipe) # **recipe unpacks dict and passes keys and values to Recipe model
-        
-    # Raise exception only after checking all recipes
-    raise HTTPException(status_code=404, detail=f"Recipe not found")
+async def get_recipe(recipe_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(RecipeModel).where(RecipeModel.id == recipe_id))
+    recipe = result.scalar()
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    return recipe
 
-# next_id = 1 # Global variable so delete doesn't conflict ID creation in the future (placeholder until database implement)
-
-@app.post("/recipes")
-def create_recipe(recipe: Recipe): # Using BaseModel to create 
-    global next_id
-    new_recipe = {
-        "id": next_id,
-        "name": recipe.name,
-        "calories": recipe.calories
-    }
-    next_id += 1
-    recipes.append(new_recipe)
+@app.post("/recipes", response_model=Recipe)
+async def create_recipe(recipe: RecipeCreate, db: AsyncSession = Depends(get_db)): # sneds a JSON, converted to RecipeCreate object
+    new_recipe = RecipeModel(name=recipe.name, calories=recipe.calories) # becomes RecipeModel (database row)
+    db.add(new_recipe)
+    await db.commit() # actually writes row to database
+    # INSERT INTO recipes
+    
+    await db.refresh(new_recipe)  # Refresh to get the auto-generated id
     return new_recipe
 
 @app.delete("/recipes/{recipe_id}")
-def delete_recipe(recipe_id: int):
-    for recipe in recipes:
-        if recipe["id"] == recipe_id:
-            recipes.remove(recipe)
-            
-            return {
-                "message": f"Recipe {recipe_id}: {recipe["name"]} deleted successfully"
-            }
-            
-    raise HTTPException(status_code=404, detail=f"Recipe not found")
+async def delete_recipe(recipe_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(RecipeModel).where(RecipeModel.id == recipe_id))
+    recipe = result.scalar()
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    await db.delete(recipe)
+    await db.commit()
+    return {"message": f"Recipe with id {recipe_id} deleted successfully"}
