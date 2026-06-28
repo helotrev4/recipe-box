@@ -38,8 +38,10 @@ async def get_db():
     async with async_session() as session:
         yield session
 
+db_dependancy = Depends(get_db)
+
 @app.get("/recipes", response_model=list[Recipe]) #results in a list of objects
-async def list_recipes(db: AsyncSession = Depends(get_db)): # async, Python does other work in the meantime
+async def list_recipes(db: AsyncSession = db_dependancy): # async, Python does other work in the meantime
     # await -> pause until database responds
     # SELECT * FROM recipes; run in SQL 
     result = await db.execute(select(RecipeModel)) #before calling function, run get_db()
@@ -47,7 +49,7 @@ async def list_recipes(db: AsyncSession = Depends(get_db)): # async, Python does
     return recipes
 
 @app.get("/recipes/{recipe_id}", response_model=Recipe)
-async def get_recipe(recipe_id: int, db: AsyncSession = Depends(get_db)):
+async def get_recipe(recipe_id: int, db: AsyncSession = db_dependancy):
     result = await db.execute(select(RecipeModel).where(RecipeModel.id == recipe_id))
     recipe = result.scalar()
     if not recipe:
@@ -55,7 +57,7 @@ async def get_recipe(recipe_id: int, db: AsyncSession = Depends(get_db)):
     return recipe
 
 @app.post("/recipes", response_model=Recipe)
-async def create_recipe(recipe: RecipeCreate, db: AsyncSession = Depends(get_db)): # sneds a JSON, converted to RecipeCreate object
+async def create_recipe(recipe: RecipeCreate, db: AsyncSession = db_dependancy): # sneds a JSON, converted to RecipeCreate object
     new_recipe = RecipeModel(name=recipe.name, calories=recipe.calories) # becomes RecipeModel (database row)
     db.add(new_recipe)
     await db.commit() # actually writes row to database
@@ -65,7 +67,7 @@ async def create_recipe(recipe: RecipeCreate, db: AsyncSession = Depends(get_db)
     return new_recipe
 
 @app.delete("/recipes/{recipe_id}")
-async def delete_recipe(recipe_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_recipe(recipe_id: int, db: AsyncSession = db_dependancy):
     result = await db.execute(select(RecipeModel).where(RecipeModel.id == recipe_id))
     recipe = result.scalar()
     if not recipe:
