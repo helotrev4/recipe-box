@@ -61,3 +61,7 @@ curl.exe -X GET http://localhost:8000/recipes/{num}
 curl.exe -X POST http://localhost:8000/recipes?name=Spaghetti (old)
 curl.exe -X POST http://localhost:8000/recipes -H "Content-Type: application/json" -d '{\"name\": \"Spaghetti\"}'
 curl.exe -X POST http://localhost:8000/recipes -H "Content-Type: application/json" -d '{\"name\": \"Spaghetti\", \"calories\": 300}'
+
+Testing:
+
+pip install pytest httpx
