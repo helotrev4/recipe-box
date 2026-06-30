@@ -50,7 +50,7 @@ venv\Scripts\activate
 
 pip install fastapi uvicorn sqlalchemy psycopg2-binary asyncpg
 
-uvicorn main:app --reload
+uvicorn backend.main:app --reload
 
 http://127.0.0.1:8000
 http://localhost:8000/docs

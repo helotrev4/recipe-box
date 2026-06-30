@@ -2,18 +2,22 @@ from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from pydantic import BaseModel
-from database import engine, async_session
-from models import Base, Recipe as RecipeModel
+from backend.database import engine, async_session
+from backend.models import Base, Recipe as RecipeModel
+from contextlib import asynccontextmanager
 
-app = FastAPI()
+
 
 # Initialize the database tables
 
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-
+    yield
+    await engine.dispose()
+    
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/")
 def root():
