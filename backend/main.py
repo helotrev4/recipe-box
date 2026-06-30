@@ -6,8 +6,6 @@ from backend.database import engine, async_session
 from backend.models import Base, Recipe as RecipeModel
 from contextlib import asynccontextmanager
 
-
-
 # Initialize the database tables
 
 @asynccontextmanager
@@ -19,20 +17,18 @@ async def lifespan(app: FastAPI):
     
 app = FastAPI(lifespan=lifespan)
 
-@app.get("/")
-def root():
-    return {"message": "Recipe Box API"}
-
 class RecipeBase(BaseModel):
-    id: int
+    # id: int
     name:str # means that this is a required for creating item
     calories:int = 0
     
-class Config:
-    orm_mode = True  # Enable ORM mode for SQLAlchemy models
+    class Config:
+        orm_mode = True  # Enable ORM mode for SQLAlchemy models
 
 class RecipeCreate(RecipeBase):
-    pass  # Used for creating recipes, excludes `id`
+    pass
+    # name: str
+    # calories: int = 0  # Used for creating recipes, excludes `id`
 
 class Recipe(RecipeBase):
     id: int  # Include `id` for responses
@@ -44,11 +40,15 @@ async def get_db():
 
 db_dependancy = Depends(get_db)
 
+@app.get("/")
+def root():
+    return {"message": "Recipe Box API"}
+
 @app.get("/recipes", response_model=list[Recipe]) #results in a list of objects
 async def list_recipes(db: AsyncSession = db_dependancy): # async, Python does other work in the meantime
     # await -> pause until database responds
     # SELECT * FROM recipes; run in SQL 
-    result = await db.execute(select(RecipeModel)) #before calling function, run get_db()
+    result = await db.execute(select(RecipeModel).order_by(RecipeModel.id)) #before calling function, run get_db()
     recipes = result.scalars().all() # extracts model object, puts them in a list
     return recipes
 
@@ -79,3 +79,20 @@ async def delete_recipe(recipe_id: int, db: AsyncSession = db_dependancy):
     await db.delete(recipe)
     await db.commit()
     return {"message": f"Recipe with id {recipe_id} deleted successfully"}
+
+@app.put("/recipes/{recipe_id}", response_model=Recipe)
+async def update_recipe(recipe_id: int, recipe: RecipeCreate, db: AsyncSession = db_dependancy):
+    result = await db.execute(select(RecipeModel).where(RecipeModel.id == recipe_id))
+    existing_recipe = result.scalar()
+
+    if not existing_recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
+    # Update the fields
+    existing_recipe.name = recipe.name
+    existing_recipe.calories = recipe.calories
+
+    await db.commit()
+    await db.refresh(existing_recipe)
+
+    return existing_recipe

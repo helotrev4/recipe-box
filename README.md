@@ -64,4 +64,5 @@ curl.exe -X POST http://localhost:8000/recipes -H "Content-Type: application/jso
 
 Testing:
 
-pip install pytest httpx
+pip install pytest httpx (httpx2?)
+pytest backend/tests/tests.py
