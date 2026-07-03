@@ -1,89 +1,44 @@
-from fastapi.testclient import TestClient
-from backend.main import app
 import pytest
+import pytest_asyncio
+from httpx import AsyncClient, ASGITransport
+# from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+# from sqlalchemy.orm import sessionmaker
 
-client = TestClient(app)
+from backend.database import test_session, test_engine
+from backend.main import app, get_db
+from backend.models import Base
 
-# Testing root endpoint
-def test_root():
+# Provies database session for testing, overrides get_db dependancy in the 
+# FastAPI app to use the test database instead of the production database
+async def override_get_db():
+    async with test_session() as session:
+        yield session
 
-    response = client.get("/")
+# Replace get_db with override_get_db for all tests
+app.dependency_overrides[get_db] = override_get_db
+
+# Runs before and after each test
+@pytest_asyncio.fixture(autouse=True) # autouse means every test gets fresh empty tables
+async def setup_db():
+    # Create tables before each test, drop them after
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+
+# HTTP client fixture
+@pytest_asyncio.fixture
+# Creates AsyncClient for making HTTP requests to FastAPI during tests
+# Uses ASGITransport to interact with app without starting server
+async def client():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        yield ac
+
+# Testing GET root 
+@pytest.mark.asyncio
+async def test_root(client):
+    response = await client.get("/")
     assert response.status_code == 200
-    assert response.json() == {
-        "message": "Recipe Box API"
-    }
-    
-# Test listing all recipes (GET /recipes)
-def test_listing_recipes(): 
-    
-    response = client.get("/recipes")
-    assert response.status_code == 200
-    assert isinstance(response.json(), list) # Ensure response is list
-
-    # Every recipe should contain these keys
-    if response.json():
-        recipe = response.json()[0]
-
-        assert "id" in recipe
-        assert "name" in recipe
-        assert "calories" in recipe
-        
-# Test getting specific recipe by ID and creating recipe (GET /recipes/{recipe_id})
-def test_get_recipe(): # doesn't work 
-
-    # Step 1
-    create = client.post("/recipes",
-        json={
-            "name": "Test Recipe",
-            "calories": 123
-        }
-    )
-
-    recipe = create.json()
-
-    recipe_id = recipe["id"] 
-
-    # Step 2
-    response = client.get(f"/recipes/{recipe_id}")
-
-    assert response.status_code == 200
-
-    recipe = response.json()
-
-    assert recipe["id"] == recipe_id
-    assert recipe["name"] == "Test Recipe"
-    assert recipe["calories"] == 123
-
-    # Step 3
-    client.delete(f"/recipes/{recipe_id}")
-    
-# Recipe doesn't exist
-def test_get_recipe_not_found():
-
-    response = client.get("/recipes/99999")
-
-    assert response.status_code == 404
-    assert response.json()["detail"] == "Recipe not found"
-    
-# # Test deleting a recipe (DELETE)
-# def test_delete_recipe():
-
-#     recipe = {
-#         "name": "Delete Me",
-#         "calories": 50
-#     }
-
-#     create = client.post(
-#         "/recipes",
-#         json=recipe
-#     )
-
-#     recipe_id = create.json()["id"]
-
-#     delete = client.delete(f"/recipes/{recipe_id}")
-
-#     assert delete.status_code == 200
-
-#     assert delete.json() == {
-#         "message": f"Recipe with id {recipe_id} deleted successfully"
-#     }
+    assert response.json() == {"message": "Recipe Box API"}

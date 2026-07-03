@@ -64,5 +64,5 @@ curl.exe -X POST http://localhost:8000/recipes -H "Content-Type: application/jso
 
 Testing:
 
-pip install pytest httpx (httpx2?)
+pip install pytest pytest_asyncio httpx aiosqlite (httpx2?)
 pytest backend/tests/tests.py

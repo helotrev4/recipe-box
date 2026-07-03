@@ -2,9 +2,11 @@ from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from pydantic import BaseModel
+from contextlib import asynccontextmanager
+
 from backend.database import engine, async_session
 from backend.models import Base, Recipe as RecipeModel
-from contextlib import asynccontextmanager
+
 
 # Initialize the database tables
 

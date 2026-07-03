@@ -13,3 +13,14 @@ async_session = sessionmaker(
     autoflush=False,
     autocommit=False
 )
+
+# Separate in-memory test database, recreated for every test
+TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+
+# Creates async database engine for test database
+test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
+
+test_session = sessionmaker(
+    test_engine, 
+    class_=AsyncSession, 
+    expire_on_commit=False)
