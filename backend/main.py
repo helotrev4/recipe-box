@@ -19,13 +19,14 @@ async def lifespan(app: FastAPI):
     
 app = FastAPI(lifespan=lifespan)
 
+# Inputs allow name and calories, not the id
 class RecipeBase(BaseModel):
     # id: int
     name:str # means that this is a required for creating item
-    calories:int = 0
+    calories:int = 0 # calories is not required, assigned 0 default
     
-    class Config:
-        orm_mode = True  # Enable ORM mode for SQLAlchemy models
+    class ConfigDict:
+        from_attributes = True  # Enable ORM mode for SQLAlchemy models
 
 class RecipeCreate(RecipeBase):
     pass
