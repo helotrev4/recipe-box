@@ -48,7 +48,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 venv\Scripts\activate
 
-pip install fastapi uvicorn sqlalchemy psycopg2-binary asyncpg
+pip install fastapi uvicorn sqlalchemy psycopg2-binary asyncpg python-dotenv
 
 uvicorn backend.main:app --reload
 

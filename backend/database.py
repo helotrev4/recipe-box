@@ -1,7 +1,11 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
+import os
+from dotenv import load_dotenv
 
-DATABASE_URL = "postgresql+asyncpg://postgres:123Awesome@localhost:5433/recipebox"
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # create database engine
 engine = create_async_engine(DATABASE_URL, echo=True)
