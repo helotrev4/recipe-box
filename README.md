@@ -44,14 +44,17 @@
 
 ## Side Notes and Commands
 
+pip install -r requirements.txt
+
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 <!-- From the root directory -->
 
 backend\.venv\Scripts\activate
+
 venv\Scripts\activate
 
-pip install fastapi uvicorn sqlalchemy psycopg2-binary asyncpg python-dotenv
+<!-- Running the app -->
 
 uvicorn backend.main:app --reload
 
@@ -65,7 +68,12 @@ curl.exe -X POST http://localhost:8000/recipes?name=Spaghetti (old)
 curl.exe -X POST http://localhost:8000/recipes -H "Content-Type: application/json" -d '{\"name\": \"Spaghetti\"}'
 curl.exe -X POST http://localhost:8000/recipes -H "Content-Type: application/json" -d '{\"name\": \"Spaghetti\", \"calories\": 300}'
 
-Testing:
+## Testing:
 
-pip install pytest pytest_asyncio httpx aiosqlite (httpx2?)
 pytest backend/tests/tests.py
+
+## Docker:
+
+docker build -t recipe-box .
+
+docker run -p 8000:8000 -e DATABASE_URL="postgresql+asyncpg://postgres:PASSWORD@host.docker.internal:5433/recipebox" recipe-box

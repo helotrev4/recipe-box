@@ -1,8 +1,5 @@
-import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
-# from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-# from sqlalchemy.orm import sessionmaker
 
 from backend.database import session_test, test_engine
 from backend.main import app, get_db

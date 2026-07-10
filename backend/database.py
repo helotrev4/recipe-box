@@ -1,6 +1,6 @@
+import os
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -19,7 +19,7 @@ async_session = sessionmaker(
 )
 
 # Separate in-memory test database, recreated for every test
-TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL")
 
 # Creates async database engine for test database
 test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
