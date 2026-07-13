@@ -1,9 +1,22 @@
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
-
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
 from backend.database import session_test, test_engine
 from backend.main import app, get_db
 from backend.models import Base
+
+
+# Separate in-memory test database, recreated for every test
+TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+
+# Creates async database engine for test database
+test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
+
+session_test = sessionmaker(
+    test_engine, 
+    class_=AsyncSession, 
+    expire_on_commit=False)
 
 # Provies database session for testing, overrides get_db dependancy in the 
 # FastAPI app to use the test database instead of the production database

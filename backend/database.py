@@ -18,13 +18,3 @@ async_session = sessionmaker(
     autocommit=False
 )
 
-# Separate in-memory test database, recreated for every test
-TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL")
-
-# Creates async database engine for test database
-test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
-
-session_test = sessionmaker(
-    test_engine, 
-    class_=AsyncSession, 
-    expire_on_commit=False)
