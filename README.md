@@ -109,7 +109,7 @@ winget install Microsoft.AzureCLI
 az login
 
 # Create a resource group to hold everything
-az group create --name recipe-box-rg --location eastus
+az group create --name recipe-box-rg --location canadacentral
 
 # Create Container registry to store Docker images
 az acr create `
@@ -154,7 +154,7 @@ az postgres flexible-server create `
 az postgres flexible-server db create `
   --resource-group recipe-box-rg `
   --server-name recipe-box-db `
-  --database-name recipebox
+  --name recipebox
 
 # Create the App Service plan, B1 is smallest paid tier (for Docker)
 az appservice plan create `
