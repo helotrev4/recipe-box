@@ -163,3 +163,7 @@ az appservice plan create `
   --is-linux `
   --sku B1
 ```
+
+## Railway:
+
+recipe-box-production-cfbd.up.railway.app
