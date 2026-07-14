@@ -1,5 +1,9 @@
 # recipe-box
 
+![CI](https://github.com/helotrev4/recipe-box/actions/workflows/ci.yml/badge.svg)
+
+A recipe management REST API built with FastAPI and PostgreSQL, containerized with Docker and deployed to Railway with an automated CI/CD pipeline.
+
 ## Tech Stack
 
 ### Frontend:
@@ -43,6 +47,17 @@
 - Microsoft Azure
 - Railway <- Azure doesn't allow
 
+## Endpoints
+
+| Method | Endpoint        | Description        |
+| ------ | --------------- | ------------------ |
+| GET    | `/`             | Health check       |
+| GET    | `/recipes`      | List all recipes   |
+| GET    | `/recipes/{id}` | Get a recipe by ID |
+| POST   | `/recipes`      | Create a recipe    |
+| PUT    | `/recipes/{id}` | Update a recipe    |
+| DELETE | `/recipes/{id}` | Delete a recipe    |
+
 ## Local Development without Docker
 
 ```bash
@@ -59,21 +74,12 @@ backend\.venv\Scripts\activate
 
 pip install -r requirements.txt
 
-# Running the app
+# Running the app (local dev server)
 
 uvicorn backend.main:app --reload
 
 http://127.0.0.1:8000
 ```
-
-<!-- If not using Docs, these commands in terminal -->
-<!--
-curl.exe -X GET http://localhost:8000
-curl.exe -X GET http://localhost:8000/rcipes/{num}
-
-curl.exe -X POST http://localhost:8000/recipes?name=Spaghetti (old)
-curl.exe -X POST http://localhost:8000/recipes -H "Content-Type: application/json" -d '{\"name\": \"Spaghetti\"}'
-curl.exe -X POST http://localhost:8000/recipes -H "Content-Type: application/json" -d '{\"name\": \"Spaghetti\", \"calories\": 300}' -->
 
 ## Local Development with Docker
 
@@ -83,7 +89,7 @@ curl.exe -X POST http://localhost:8000/recipes -H "Content-Type: application/jso
 
 docker build -t recipe-box .
 
-# Run container
+# Run container (local container on machine)
 
 docker run -p 8000:8000 -e DATABASE_URL="postgresql+asyncpg://postgres:PASSWORD@host.docker.internal:5433/recipebox" recipe-box
 
@@ -167,3 +173,24 @@ az appservice plan create `
   --is-linux `
   --sku B1
 ``` -->
+
+## Tech Stack
+
+- **Backend** — FastAPI, Python 3.11
+- **Database** — PostgreSQL (managed), SQLAlchemy async, Alembic
+- **Testing** — pytest, pytest-asyncio, httpx
+- **DevOps** — Docker, GitHub Actions CI/CD, Railway
+
+## Live API
+
+Base URL: `recipe-box-production-cfbd.up.railway.app`
+
+API docs: `recipe-box-production-cfbd.up.railway.app/docs`
+
+## CI/CD Pipeline
+
+Every push to `main`:
+
+1. GitHub Actions runs the test suite automatically
+2. If tests pass, Railway deploys the latest Docker image
+3. If tests fail, deployment is blocked
