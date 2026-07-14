@@ -44,14 +44,13 @@ A recipe management REST API built with FastAPI and PostgreSQL, containerized wi
 
 ### Cloud
 
-- Microsoft Azure
-- Railway <- Azure doesn't allow
+- Railway
 
 ## Endpoints
 
 | Method | Endpoint        | Description        |
 | ------ | --------------- | ------------------ |
-| GET    | `/`             | Health check       |
+| GET    | `/`             | Get Root           |
 | GET    | `/recipes`      | List all recipes   |
 | GET    | `/recipes/{id}` | Get a recipe by ID |
 | POST   | `/recipes`      | Create a recipe    |
