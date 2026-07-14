@@ -103,7 +103,7 @@ pytest backend/tests/tests.py
 
 recipe-box-production-cfbd.up.railway.app
 
-## Azure:
+<!-- ## Azure:
 
 ```bash
 # installation
@@ -166,4 +166,4 @@ az appservice plan create `
   --resource-group recipe-box-rg `
   --is-linux `
   --sku B1
-```
+``` -->

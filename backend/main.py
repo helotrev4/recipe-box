@@ -7,9 +7,9 @@ from contextlib import asynccontextmanager
 from backend.database import engine, async_session
 from backend.models import Base, Recipe as RecipeModel
 
+# Recipe Box API - FastAPI Backend
 
 # Initialize the database tables
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
