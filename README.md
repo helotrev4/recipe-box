@@ -99,6 +99,10 @@ http://localhost:8000/docs
 pytest backend/tests/tests.py
 ```
 
+## Railway:
+
+recipe-box-production-cfbd.up.railway.app
+
 ## Azure:
 
 ```bash
@@ -163,7 +167,3 @@ az appservice plan create `
   --is-linux `
   --sku B1
 ```
-
-## Railway:
-
-recipe-box-production-cfbd.up.railway.app
