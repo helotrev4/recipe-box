@@ -194,3 +194,7 @@ Every push to `main`:
 1. GitHub Actions runs the test suite automatically
 2. If tests pass, Railway deploys the latest Docker image
 3. If tests fail, deployment is blocked
+
+## Security
+
+JWT tokens
