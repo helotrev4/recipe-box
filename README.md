@@ -11,6 +11,7 @@ A recipe management REST API built with FastAPI and PostgreSQL, containerized wi
 - React
 - TypeScript
 - CSS
+- Vite (faster than Create React App, industry standard now)
 
 ### Backend:
 
